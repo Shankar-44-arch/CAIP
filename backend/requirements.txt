@@ -6,15 +6,29 @@
 
 fastapi==0.110.0
 uvicorn[standard]==0.27.1
-pydantic==2.6.1
-pydantic-settings==2.1.0
+# BUMPED from 2.6.1: pydantic-core (Rust ext) has no Python 3.14 wheel
+# before pydantic 2.12.0, so pip tried to compile it and needed a
+# Rust toolchain + MSVC linker that aren't installed. 2.12.5 ships
+# prebuilt cp314 wheels.
+pydantic==2.12.5
+# BUMPED from 2.1.0 to stay compatible with pydantic 2.12.x above.
+pydantic-settings==2.12.0
 python-multipart==0.0.9
 
-sqlalchemy[asyncio]==2.0.27
-asyncpg==0.29.0
+sqlalchemy[asyncio]==2.0.51
+# BUMPED from 2.0.27: Python 3.14 added new attributes
+# (__static_attributes__, __firstlineno__) to every class definition,
+# which tripped SQLAlchemy's internal TypingOnly assertion and raised
+# an AssertionError on import. Fixed in 2.0.36+; using latest 2.0.x
+# (2.0.51) for the accumulated 3.14 compatibility patches since then.
+asyncpg==0.31.0
 alembic==1.13.1
 geoalchemy2==0.14.3
-shapely==2.0.2
+# BUMPED from 2.0.2: no Python 3.14 wheel existed for that version
+# (released before 3.14 shipped), causing a source build that failed
+# on a setuptools 82+ / pkg_resources removal issue. 2.1.2 has
+# prebuilt cp314 wheels.
+shapely==2.1.2
 
 python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
@@ -37,6 +51,9 @@ redis==5.0.1
 pytest==8.0.0
 pytest-asyncio==0.23.5
 aiosqlite==0.19.0
-scikit-learn==1.4.0
+# BUMPED from 1.4.0: no Python 3.14 wheel until 1.7.2 (the first
+# release to support it), causing a source build that needs MSVC
+# C++ Build Tools.
+scikit-learn==1.7.2
 pdfplumber==0.11.0
 reportlab==4.1.0

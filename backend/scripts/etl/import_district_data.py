@@ -251,22 +251,32 @@ async def load_into_postgres(structured_rows: list[dict]) -> None:
             )
         await db.flush()
 
-        # 2. Ensure district rows exist (with centroid from geo reference)
+        # 2. Ensure district rows exist (with centroid from geo reference if PostGIS available)
         districts = {(r["district_code"], r["district_name"]) for r in structured_rows}
+
+        # Detect whether the centroid column exists (it's absent on non-PostGIS local DBs)
+        centroid_col_exists_row = await db.execute(
+            text("""SELECT COUNT(*) FROM information_schema.columns
+                    WHERE table_name='district' AND column_name='centroid'""")
+        )
+        centroid_col_exists = centroid_col_exists_row.scalar() > 0
+
         for code, name in districts:
             centroid = KARNATAKA_DISTRICT_CENTROIDS.get(code)
-            geom_sql = "NULL"
-            params = {"code": code, "name": name}
-            if centroid and centroid[0] is not None:
-                geom_sql = "ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)"
-                params["lat"] = centroid[0]
-                params["lng"] = centroid[1]
-            await db.execute(
-                text(f"""INSERT INTO district (district_code, district_name, centroid)
-                         VALUES (:code, :name, {geom_sql})
-                         ON CONFLICT (district_code) DO UPDATE SET district_name = :name"""),
-                params,
-            )
+            if centroid_col_exists and centroid and centroid[0] is not None:
+                await db.execute(
+                    text("""INSERT INTO district (district_code, district_name, centroid)
+                             VALUES (:code, :name, ST_SetSRID(ST_MakePoint(:lng, :lat), 4326))
+                             ON CONFLICT (district_code) DO UPDATE SET district_name = :name"""),
+                    {"code": code, "name": name, "lat": centroid[0], "lng": centroid[1]},
+                )
+            else:
+                await db.execute(
+                    text("""INSERT INTO district (district_code, district_name)
+                             VALUES (:code, :name)
+                             ON CONFLICT (district_code) DO UPDATE SET district_name = :name"""),
+                    {"code": code, "name": name},
+                )
         await db.flush()
 
         # 3. Insert district_crime_stats rows (idempotent upsert)

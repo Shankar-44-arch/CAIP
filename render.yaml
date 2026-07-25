@@ -1,0 +1,42 @@
+databases:
+  - name: caip-postgres
+    databaseName: caip_karnataka
+    user: caip_user
+    plan: free # Render's free tier postgres database (lasts 90 days)
+
+services:
+  - type: web
+    name: caip-backend
+    env: docker
+    dockerContext: backend
+    dockerfilePath: backend/Dockerfile
+    plan: free
+    # releaseCommand runs before a new deploy goes live. This will automatically
+    # initialize the database, apply the schema, run ETL, and seed data.
+    releaseCommand: python scripts/init_db.py
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: caip-postgres
+          property: connectionString
+      - key: DATABASE_SSL
+        value: "true"
+      - key: ENVIRONMENT
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: FRONTEND_URL
+        fromService:
+          name: caip-frontend
+          type: static
+          property: host
+
+  - type: static
+    name: caip-frontend
+    env: static
+    baseDir: frontend
+    buildCommand: npm install && npm run build
+    publishDir: dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: ${caip_backend_URL}/api/v1
