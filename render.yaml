@@ -7,7 +7,7 @@ databases:
 services:
   - type: web
     name: caip-backend
-    env: docker
+    runtime: docker
     dockerContext: backend
     dockerfilePath: backend/Dockerfile
     plan: free
@@ -25,18 +25,16 @@ services:
         value: production
       - key: SECRET_KEY
         generateValue: true
-      - key: FRONTEND_URL
-        fromService:
-          name: caip-frontend
-          type: static
-          property: host
 
-  - type: static
+  - type: web
     name: caip-frontend
-    env: static
-    baseDir: frontend
+    runtime: static
+    rootDir: frontend
     buildCommand: npm install && npm run build
-    publishDir: dist
+    staticPublishPath: ./dist
     envVars:
       - key: VITE_API_BASE_URL
-        value: ${caip_backend_URL}/api/v1
+        fromService:
+          name: caip-backend
+          type: web
+          property: url
