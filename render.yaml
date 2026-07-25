@@ -10,10 +10,8 @@ services:
     runtime: docker
     dockerContext: backend
     dockerfilePath: backend/Dockerfile
+    dockerCommand: sh -c "python scripts/init_db.py && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
     plan: free
-    # releaseCommand runs before a new deploy goes live. This will automatically
-    # initialize the database, apply the schema, run ETL, and seed data.
-    releaseCommand: python scripts/init_db.py
     envVars:
       - key: DATABASE_URL
         fromDatabase:
