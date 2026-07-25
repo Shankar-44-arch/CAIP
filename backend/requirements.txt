@@ -1,0 +1,42 @@
+# CAIP-Karnataka Backend Dependencies
+# Trimmed vs. original CAIP: no xgboost/lightgbm/shap/hdbscan/torch —
+# CrimeTrendAgent explicitly refuses to run ML with <3 years of data
+# (see docs/DATA_LIMITATIONS.md), so those heavy ML deps would be dead
+# weight until real multi-year data justifies re-adding them.
+
+fastapi==0.110.0
+uvicorn[standard]==0.27.1
+pydantic==2.6.1
+pydantic-settings==2.1.0
+python-multipart==0.0.9
+
+sqlalchemy[asyncio]==2.0.27
+asyncpg==0.29.0
+alembic==1.13.1
+geoalchemy2==0.14.3
+shapely==2.0.2
+
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+# BUG FIX: pin bcrypt to 3.2.2 explicitly. passlib[bcrypt] 1.7.4 does
+# not itself pin a bcrypt version, so pip installs the latest bcrypt
+# (4.x), whose stricter 72-byte password truncation check raises
+# "password cannot be longer than 72 bytes" during user registration
+# even for normal-length passwords — a known incompatibility between
+# passlib 1.7.4's legacy backend detection and bcrypt >=4.0. Pinning
+# 3.2.2 (the last version passlib 1.7.4 was actually tested against)
+# resolves it without touching passlib itself.
+bcrypt==3.2.2
+
+httpx==0.26.0
+python-dotenv==1.0.1
+
+# Only needed if REDIS_ENABLED=true
+redis==5.0.1
+
+pytest==8.0.0
+pytest-asyncio==0.23.5
+aiosqlite==0.19.0
+scikit-learn==1.4.0
+pdfplumber==0.11.0
+reportlab==4.1.0
