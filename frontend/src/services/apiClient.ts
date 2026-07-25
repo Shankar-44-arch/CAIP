@@ -4,6 +4,10 @@ import type { KarnatakaCrimeReport, District, DisabledFeature } from '@/types';
 
 let rawApiUrl = import.meta.env.VITE_API_BASE_URL || '/api/v1';
 if (rawApiUrl && !rawApiUrl.startsWith('http://') && !rawApiUrl.startsWith('https://') && !rawApiUrl.startsWith('/')) {
+  // If Render passed an internal hostname (e.g. "caip-backend-dexu" without domain), append .onrender.com
+  if (!rawApiUrl.includes('.') && !rawApiUrl.includes(':')) {
+    rawApiUrl = `${rawApiUrl}.onrender.com`;
+  }
   rawApiUrl = `https://${rawApiUrl}`;
 }
 if (rawApiUrl.startsWith('http') && !rawApiUrl.includes('/api/v1')) {
