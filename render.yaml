@@ -22,6 +22,11 @@ services:
         value: production
       - key: SECRET_KEY
         generateValue: true
+      - key: FRONTEND_URL
+        fromService:
+          name: caip-frontend
+          type: web
+          property: host
 
   - type: web
     name: caip-frontend
