@@ -92,10 +92,10 @@ async def init_database():
     # Run the ETL pipeline to import all OGD district CSVs
     logger.info("Running OGD district data ETL pipeline...")
     etl_script = _BACKEND_DIR / "scripts" / "etl" / "import_district_data.py"
-    # The repo root is one level above the backend dir
-    repo_root = _BACKEND_DIR.parent
-    import glob as _glob
-    csv_files = sorted(_glob.glob(str(repo_root / "data" / "raw" / "dstrIPC_*.csv")))
+    # Search for CSV files in both container layout (/app/data/raw) and repo layout (../data/raw)
+    csv_files = sorted(_glob.glob(str(_BACKEND_DIR / "data" / "raw" / "dstrIPC_*.csv")))
+    if not csv_files:
+        csv_files = sorted(_glob.glob(str(_BACKEND_DIR.parent / "data" / "raw" / "dstrIPC_*.csv")))
     if not csv_files:
         logger.warning("No OGD CSV files found in data/raw/ — skipping ETL import.")
     else:
