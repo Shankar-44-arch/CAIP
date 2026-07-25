@@ -23,7 +23,12 @@ async def init_database():
         sys.exit(1)
 
     url = settings.DATABASE_URL.replace("postgresql+asyncpg://", "postgresql://")
-    ssl_context = ssl.create_default_context() if settings.database_ssl_enabled else None
+    if settings.database_ssl_enabled:
+        ssl_context = ssl.create_default_context()
+        ssl_context.check_hostname = False
+        ssl_context.verify_mode = ssl.CERT_NONE
+    else:
+        ssl_context = None
 
     logger.info("Connecting to database...")
     try:

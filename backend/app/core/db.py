@@ -13,8 +13,17 @@ from sqlalchemy.orm import DeclarativeBase
 
 from app.core.config import settings
 
+connect_args = {}
+if settings.database_ssl_enabled:
+    import ssl
+    ssl_context = ssl.create_default_context()
+    ssl_context.check_hostname = False
+    ssl_context.verify_mode = ssl.CERT_NONE
+    connect_args["ssl"] = ssl_context
+
 engine = create_async_engine(
     settings.DATABASE_URL,
+    connect_args=connect_args,
     pool_size=settings.DB_POOL_SIZE,
     max_overflow=settings.DB_MAX_OVERFLOW,
     pool_pre_ping=True,
