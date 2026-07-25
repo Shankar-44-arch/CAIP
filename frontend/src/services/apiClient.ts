@@ -2,7 +2,14 @@
 import axios, { type AxiosInstance, type AxiosError } from 'axios';
 import type { KarnatakaCrimeReport, District, DisabledFeature } from '@/types';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api/v1';
+let rawApiUrl = import.meta.env.VITE_API_BASE_URL || '/api/v1';
+if (rawApiUrl && !rawApiUrl.startsWith('http://') && !rawApiUrl.startsWith('https://') && !rawApiUrl.startsWith('/')) {
+  rawApiUrl = `https://${rawApiUrl}`;
+}
+if (rawApiUrl.startsWith('http') && !rawApiUrl.includes('/api/v1')) {
+  rawApiUrl = `${rawApiUrl.replace(/\/$/, '')}/api/v1`;
+}
+const API_BASE_URL = rawApiUrl;
 
 class ApiClient {
   private client: AxiosInstance;

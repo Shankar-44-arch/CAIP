@@ -35,4 +35,4 @@ services:
         fromService:
           name: caip-backend
           type: web
-          property: url
+          property: host
