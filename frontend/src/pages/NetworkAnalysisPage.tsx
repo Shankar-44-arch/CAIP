@@ -50,9 +50,9 @@ export default function NetworkAnalysisPage() {
   }, [data]);
 
   const getNodeColor = (node: any) => {
-    if (node.risk_level === 'High') return caipPalette.errorRed;
-    if (node.risk_level === 'Medium') return caipPalette.accentOrange;
-    return caipPalette.successGreen;
+    if (node.risk_level === 'High') return caipPalette.riskCritical;
+    if (node.risk_level === 'Medium') return caipPalette.riskHigh;
+    return caipPalette.riskLow;
   };
 
   const drawNodeCanvas = useCallback((node: any, ctx: CanvasRenderingContext2D, globalScale: number) => {
