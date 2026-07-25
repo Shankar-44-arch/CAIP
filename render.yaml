@@ -10,7 +10,6 @@ services:
     runtime: docker
     dockerContext: backend
     dockerfilePath: backend/Dockerfile
-    dockerCommand: sh -c "python scripts/init_db.py && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
     plan: free
     envVars:
       - key: DATABASE_URL
